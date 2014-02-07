@@ -94,7 +94,7 @@ obj-$(CONFIG_MSM_IPC_LOGGING) += ipc_logging.o
 ifdef CONFIG_DEBUG_FS
 obj-$(CONFIG_MSM_IPC_LOGGING) += ipc_logging_debug.o
 endif
-obj-$(CONFIG_MSM_SMD) += smd.o smd_debug.o remote_spinlock.o smd_private.o
+obj-$(CONFIG_MSM_SMD) += smd.o remote_spinlock.o smd_private.o
 obj-y += socinfo.o
 ifndef CONFIG_ARCH_MSM9615
 ifndef CONFIG_ARCH_APQ8064
@@ -400,5 +400,7 @@ endif
 obj-$(CONFIG_MSM_CPU_PWRCTL) +=  msm_cpu_pwrctl.o
 
 obj-$(CONFIG_CPU_FREQ_MSM) += cpufreq.o
-
+obj-$(CONFIG_INTELLI_PLUG) += intelli_plug.o
+obj-$(CONFIG_MSM_CPUFREQ_LIMITER) += cpufreq_limit.o
+obj-$(CONFIG_FORCE_FAST_CHARGE) += fastchg.o
 obj-$(CONFIG_ARCH_RANDOM) += early_random.o
