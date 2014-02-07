@@ -4,6 +4,13 @@
 
 menu "Misc devices"
 
+config GAMMA_CONTROL
+  tristate "Mako Gamma Control"
+  default y
+  help
+    This adds full support for Gamma screen tweaking on
+    Mako.
+
 config SENSORS_LIS3LV02D
 	tristate
 	depends on INPUT
@@ -679,6 +686,18 @@ config LGE_FTT_CHARGER
 	bool "WIRELESS CHARGER FTT support"
 	help
 	  Wireless Charging Frequeny Tracking Technology  Device Driver.
+
+config FSYNC_CONTROL
+        bool "Support for FSync Control"
+        default y
+        help
+          Say Y here to enable FSync Control
+
+config BLX
+  bool "Support for Battery Life eXtender"
+  default y
+  help
+    Say Y here to enable Battery Life eXtender
 
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
