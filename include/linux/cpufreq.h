@@ -381,9 +381,6 @@ extern struct cpufreq_governor cpufreq_gov_wheatley;
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_ASSWAX)
 extern struct cpufreq_governor cpufreq_gov_asswax;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_asswax)
-#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_MSM)
-extern struct cpufreq_governor cpufreq_gov_msm;
-#define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_msm)
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_HYPER)
 extern struct cpufreq_governor cpufreq_gov_hyper;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_hyper)
