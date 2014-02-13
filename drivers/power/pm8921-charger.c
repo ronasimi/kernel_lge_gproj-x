@@ -28,7 +28,7 @@
 #include <linux/debugfs.h>
 #include <linux/slab.h>
 #include <linux/ratelimit.h>
-#include <linux/blx.h>
+
 
 #include <mach/msm_xo.h>
 #include <mach/msm_hsusb.h>
@@ -60,6 +60,10 @@
 
 #ifdef CONFIG_LGE_PM_REMOVE_BATT
 #include <linux/reboot.h>
+#endif
+
+#ifdef CONFIG_BLX
+#include <linux/blx.h>
 #endif
 
 #define ChgLog(x, ...) //printk(x, ##__VA_ARGS__)
