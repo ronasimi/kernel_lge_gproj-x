@@ -74,6 +74,15 @@ config CPU_FREQ_DEFAULT_GOV_HYPER
  	help
  	  Use as default governor
 
+config CPU_FREQ_DEFAULT_GOV_INTELLIACTIVE
+	bool "intelliactive"
+	select CPU_FREQ_GOV_INTELLIACTIVE
+	help
+	  Use the CPUFreq governor 'intelliactive' as default. This allows
+	  you to get a full dynamic cpu frequency capable system by simply
+	  loading your cpufreq low-level hardware driver, using the
+	  'interactive' governor for latency-sensitive workloads.
+
 config CPU_FREQ_DEFAULT_GOV_INTELLIDEMAND
 	bool "intellidemand"
 	select CPU_FREQ_GOV_INTELLIDEMAND
@@ -188,12 +197,29 @@ config CPU_FREQ_GOV_CONSERVATIVE
 
 	  If in doubt, say N.
 
-config CPU_FREQ_DEFAULT_GOV_HYPER
+config CPU_FREQ_GOV_HYPER
 	bool "hyper"
 	select CPU_FREQ_GOV_HYPER
 	help
 	  Use the CPUFreq governor 'hyper' as default. See hyper
 	  governor help for more details.
+
+config CPU_FREQ_GOV_INTELLIACTIVE
+	tristate "'intelliactive' cpufreq policy governor"
+	help
+	  'intelliactive' - This driver adds a dynamic cpufreq policy governor
+	  designed for latency-sensitive workloads.
+
+	  This governor attempts to reduce the latency of clock
+	  increases so that the system is more responsive to
+	  interactive workloads.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called cpufreq_interactive.
+
+	  For details, take a look at linux/Documentation/cpu-freq.
+
+	  If in doubt, say N.
 
 config CPU_FREQ_GOV_INTELLIDEMAND
         tristate "'intellidemand' cpufreq policy governor"
@@ -232,6 +258,13 @@ config CPUFREQ_LIMIT_MAX_FREQ
 	depends on CPU_FREQ_GOV_INTELLIDEMAND
 	help
 	  Limit Max Freq while screen is on for Intellidemand governor
+
+config CPUFREQ_ID_PERFLOCK
+	bool "Intellidemand Performance Lock"
+	depends on CPU_FREQ_GOV_INTELLIDEMAND
+	default n
+	help
+		Minimum CPU performance lock for Intellidemand governor
 
 config CPU_FREQ_GOV_INTERACTIVE
 	tristate "'interactive' cpufreq policy governor"
