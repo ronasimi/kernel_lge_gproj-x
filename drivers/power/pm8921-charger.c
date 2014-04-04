@@ -27,6 +27,7 @@
 #include <linux/workqueue.h>
 #include <linux/debugfs.h>
 #include <linux/slab.h>
+#include <linux/blx.h>
 #include <linux/ratelimit.h>
 
 
@@ -64,10 +65,6 @@
 
 #ifdef CONFIG_BLX
 #include <linux/blx.h>
-#endif
-
-#ifdef CONFIG_FORCE_FAST_CHARGE
-#include <linux/fastchg.h>
 #endif
 
 #define ChgLog(x, ...) //printk(x, ##__VA_ARGS__)
@@ -2388,6 +2385,19 @@ static int get_prop_batt_status(struct pm8921_chg_chip *chip)
 			batt_state = POWER_SUPPLY_STATUS_NOT_CHARGING;
 #endif
 	}
+
+	if (chip->eoc_check_soc) {
+    #ifdef CONFIG_BLX
+        if (get_prop_batt_capacity(chip) >= get_charginglimit())
+    #else
+            if (get_prop_batt_capacity(chip) == 100) 
+    #endif
+			if (batt_state == POWER_SUPPLY_STATUS_CHARGING)
+				batt_state = POWER_SUPPLY_STATUS_FULL;
+    }   else {
+			if (batt_state == POWER_SUPPLY_STATUS_FULL)
+				batt_state = POWER_SUPPLY_STATUS_CHARGING;
+		}
 	
 #if defined(CONFIG_MACH_APQ8064_GK_KR) || defined(CONFIG_MACH_APQ8064_GV_KR)
 #ifdef CONFIG_LGE_CHARGER_TEMP_SCENARIO
@@ -2720,40 +2730,7 @@ static void __pm8921_charger_vbus_draw(unsigned int mA)
 			i--;
 		if (i < 0)
 			i = 0;
-
-#ifdef CONFIG_FORCE_FAST_CHARGE
-		if (force_fast_charge == 1)
-			i = 14;
-		else if (force_fast_charge == 2) {
-			switch (fast_charge_level) {
-				case FAST_CHARGE_500:
-					i = 2;
-					break;
-				case FAST_CHARGE_700:
-					i = 4;
-					break;
-				case FAST_CHARGE_900:
-					i = 8;
-					break;
-				case FAST_CHARGE_1100:
-					i = 10;
-					break;
-				case FAST_CHARGE_1300:
-					i = 12;
-					break;
-				case FAST_CHARGE_1500:
-					i = 14;
-					break;
-				default:
-					break;
-			}
-		}
 		rc = pm_chg_iusbmax_set(the_chip, i);
-		pr_info("charge curent index => %d\n", i);
-#else
-		rc = pm_chg_iusbmax_set(the_chip, i);
-#endif
-
 		if (rc) {
 			pr_err("unable to set iusb to %d rc = %d\n", i, rc);
 		}
@@ -4744,8 +4721,7 @@ static int ichg_threshold_ua = -400000;
 module_param(ichg_threshold_ua, int, 0644);
 
 #define PM8921_CHG_VDDMAX_RES_MV	10
-static void adjust_vdd_max_for_fastchg(struct pm8921_chg_chip *chip,
-						int vbat_batt_terminal_uv)
+static void adjust_vdd_max_for_fastchg(struct pm8921_chg_chip *chip)
 {
 	int adj_vdd_max_mv, programmed_vdd_max;
 	int vbat_batt_terminal_mv;
@@ -5065,6 +5041,16 @@ static void eoc_worker(struct work_struct *work)
 		count = 0;
 	}
 
+	if (chip->eoc_check_soc) {
+		percent_soc = get_prop_batt_capacity(chip);
+    #ifdef CONFIG_BLX
+        if (percent_soc >= get_charginglimit())
+    #else
+            if (percent_soc == 100)
+    #endif
+			count = CONSECUTIVE_COUNT;
+	}
+
 	if (count == CONSECUTIVE_COUNT) {
 		count = 0;
 		pr_info("End of Charging\n");
@@ -5097,14 +5083,18 @@ static void eoc_worker(struct work_struct *work)
 		if (is_ext_charging(chip))
 #endif
 			chip->ext_charge_done = true;
-//#ifdef CONFIG_BLX
-
-//#else
-		if (chip->is_bat_warm || chip->is_bat_cool)
-			chip->bms_notify.is_battery_full = 0;
-		else
-			chip->bms_notify.is_battery_full = 1;
-//#endif
+    #ifdef CONFIG_BLX
+        //if (chip->is_bat_warm || chip->is_bat_cool)
+          //  chip->bms_notify.is_battery_full = 0;
+        //else
+          //  chip->bms_notify.is_battery_full = 1;
+    #else
+        if (chip->is_bat_warm || chip->is_bat_cool)
+          chip->bms_notify.is_battery_full = 0;
+        else
+          chip->bms_notify.is_battery_full = 1;
+     #endif
+        
 		/* declare end of charging by invoking chgdone interrupt */
 		chgdone_irq_handler(chip->pmic_chg_irq[CHGDONE_IRQ], chip);
 #ifdef CONFIG_LGE_PM
