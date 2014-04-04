@@ -2265,13 +2265,6 @@ static void msm_chg_detect_work(struct work_struct *w)
 		delay = MSM_CHG_DCD_POLL_TIME;
 		break;
 	case USB_CHG_STATE_WAIT_FOR_DCD:
-		if (slimport_is_connected()) {
-			msm_chg_block_off(motg);
-			motg->chg_state = USB_CHG_STATE_DETECTED;
-			motg->chg_type = USB_SDP_CHARGER;
-			queue_work(system_nrt_wq, &motg->sm_work);
-			return;
-		}
 		if (msm_chg_mhl_detect(motg)) {
 			msm_chg_block_off(motg);
 			motg->chg_state = USB_CHG_STATE_DETECTED;
@@ -2679,7 +2672,6 @@ static void msm_otg_sm_work(struct work_struct *w)
 			break;
 		} else {
 			pr_debug("chg_work cancel");
-			clear_bit(A_BUS_REQ, &motg->inputs);
 			cancel_delayed_work_sync(&motg->chg_work);
 #ifdef CONFIG_LGE_PM
 			cancel_delayed_work_sync(&check_ta_work);
@@ -3423,7 +3415,6 @@ static void msm_otg_set_vbus_state(int online)
 	struct msm_otg *motg = the_msm_otg;
 	struct usb_otg *otg = motg->phy.otg;
 
-	// need BSV interrupt in A Host Mode to detect cable unplug -ziddey
 	/* In A Host Mode, ignore received BSV interrupts */
 	if (otg->phy->state >= OTG_STATE_A_IDLE)
 		return;
@@ -3434,15 +3425,6 @@ static void msm_otg_set_vbus_state(int online)
 	} else {
 		pr_info("PMIC: BSV clear\n");
 		clear_bit(B_SESS_VLD, &motg->inputs);
-
-		// disable host mode (if enabled) -ziddey
-		if (otg_hack_active) {
-			if (test_and_clear_bit(ID_A, &motg->inputs)) {
-				pr_info("*** UNFORCING USB HOST MODE ***\n");
-				motg->chg_state = USB_CHG_STATE_UNDEFINED;
-				motg->chg_type = USB_INVALID_CHARGER;
-			}
-		}
 	}
 
 #if defined(CONFIG_USB_G_LGE_ANDROID) && defined(CONFIG_USB_OTG)
