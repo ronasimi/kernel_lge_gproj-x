@@ -4959,6 +4959,7 @@ static void eoc_worker(struct work_struct *work)
 	int vbat_meas_uv, vbat_meas_mv;
 	int ichg_meas_ua, ichg_meas_ma;
 	int vbat_batt_terminal_uv;
+	int percent_soc;
 
 	pm_chg_failed_clear(chip, 1);
 #ifdef CONFIG_LGE_WIRELESS_CHARGER
