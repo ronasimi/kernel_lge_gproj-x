@@ -66,7 +66,9 @@
 #ifdef CONFIG_BLX
 #include <linux/blx.h>
 #endif
-
+#ifdef CONFIG_FORCE_FAST_CHARGE
+#include <linux/fastchg.h>
+#endif
 #define ChgLog(x, ...) //printk(x, ##__VA_ARGS__)
 
 #ifdef CONFIG_LGE_PM_ADP_CHG
@@ -4721,7 +4723,8 @@ static int ichg_threshold_ua = -400000;
 module_param(ichg_threshold_ua, int, 0644);
 
 #define PM8921_CHG_VDDMAX_RES_MV	10
-static void adjust_vdd_max_for_fastchg(struct pm8921_chg_chip *chip)
+static void adjust_vdd_max_for_fastchg(struct pm8921_chg_chip *chip,
+						int vbat_batt_terminal_uv)
 {
 	int adj_vdd_max_mv, programmed_vdd_max;
 	int vbat_batt_terminal_mv;
