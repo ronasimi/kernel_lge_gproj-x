@@ -199,7 +199,6 @@ config CPU_FREQ_GOV_CONSERVATIVE
 
 config CPU_FREQ_GOV_HYPER
 	bool "hyper"
-	select CPU_FREQ_GOV_HYPER
 	help
 	  Use the CPUFreq governor 'hyper' as default. See hyper
 	  governor help for more details.
